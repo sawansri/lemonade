@@ -399,6 +399,10 @@ json LlamaCppServer::chat_completion(const json& request) {
     if (modified_request.contains("max_completion_tokens") && !modified_request.contains("max_tokens")) {
         modified_request["max_tokens"] = modified_request["max_completion_tokens"];
     }
+    // Enable llama.cpp prompt cache by default while preserving explicit client overrides.
+    if (!modified_request.contains("cache_prompt")) {
+        modified_request["cache_prompt"] = true;
+    }
     return forward_request("/v1/chat/completions", modified_request);
 }
 

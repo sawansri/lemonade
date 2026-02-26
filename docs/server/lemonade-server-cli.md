@@ -107,6 +107,19 @@ export LEMONADE_LLAMACPP_VULKAN_BIN=/path/to/my/llama-server
 lemonade-server serve
 ```
 
+### llama.cpp Prompt Cache Reuse
+
+Lemonade already supports llama.cpp `--cache-reuse` through `--llamacpp-args` (or `LEMONADE_LLAMACPP_ARGS`).
+
+- Leave it unset to keep llama.cpp default behavior.
+- Set it explicitly if you want a minimum shared-prefix threshold for prompt cache reuse.
+
+Example:
+
+```bash
+lemonade-server serve --llamacpp-args "--cache-reuse 256"
+```
+
 #### API Key and Security
 
 If you expose your server over a network you can use the `LEMONADE_API_KEY` environment variable to set an API key (use a random long string) that will be required to execute any request. The API key will be expected as HTTP Bearer authentication, which is compatible with the OpenAI API.

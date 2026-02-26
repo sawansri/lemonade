@@ -151,13 +151,27 @@ void WrappedServer::forward_streaming_request(const std::string& endpoint,
     }
 
     std::string url = get_base_url() + endpoint;
+    std::string forward_body = request_body;
+
+    // Streaming chat bypasses backend JSON mutation hooks, so default cache_prompt here.
+    if (endpoint == "/v1/chat/completions") {
+        try {
+            json request_json = json::parse(request_body);
+            if (!request_json.contains("cache_prompt")) {
+                request_json["cache_prompt"] = true;
+                forward_body = request_json.dump();
+            }
+        } catch (...) {
+            // Keep original body on parse errors to avoid changing existing error behavior.
+        }
+    }
 
     try {
 
         if (sse) {
             // Use StreamingProxy to forward the SSE stream with telemetry callback
             // Use INFERENCE_TIMEOUT_SECONDS (0 = infinite) as chat completions can take a long time
-            StreamingProxy::forward_sse_stream(url, request_body, sink,
+            StreamingProxy::forward_sse_stream(url, forward_body, sink,
                 [this](const StreamingProxy::TelemetryData& telemetry) {
                     // Save telemetry to member variable
                     telemetry_.input_tokens = telemetry.input_tokens;
@@ -169,7 +183,7 @@ void WrappedServer::forward_streaming_request(const std::string& endpoint,
                 INFERENCE_TIMEOUT_SECONDS
             );
         } else {
-            StreamingProxy::forward_byte_stream(url, request_body, sink, INFERENCE_TIMEOUT_SECONDS);
+            StreamingProxy::forward_byte_stream(url, forward_body, sink, INFERENCE_TIMEOUT_SECONDS);
         }
     } catch (const std::exception& e) {
         // Log the error but don't crash the server

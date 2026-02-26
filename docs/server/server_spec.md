@@ -1175,6 +1175,9 @@ You can configure recipe-specific options on a per-model basis. Lemonade manages
 
 Note that model names include any applicable prefix, such as `user.` and `extra.`.
 
+You can pass llama.cpp prompt-cache tuning flags such as `--cache-reuse` via `llamacpp_args`.
+If not provided, Lemonade does not inject `--cache-reuse`, so llama.cpp defaults are preserved.
+
 #### Example requests
 
 Basic load:
