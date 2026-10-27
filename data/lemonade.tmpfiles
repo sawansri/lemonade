@@ -1,0 +1,8 @@
+# Without XDG_RUNTIME_DIR, rootless Podman keeps its runtime state in the
+# service's private /tmp, which age-based cleanup must not reach while lemond
+# runs, as Podman's own tmpfiles.d does for /tmp/podman-run-*.
+x /tmp/systemd-private-%b-lemond.service-*/tmp/*
+# Podman 4's rootless network namespace mounts over the nearest existing parent
+# of /var/lib/cni, which is /var/lib until Podman's boot-time tmpfiles.d runs,
+# hiding the lemonade account's storage under /var/lib/lemonade.
+d /var/lib/cni 0755 root root -
